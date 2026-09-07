@@ -79,6 +79,16 @@
     border-radius: 999px;
   }
   .overlay.hidden { display: none; }
+  .loco {
+    font-size: clamp(11px, 2.2vw, 14px);
+    letter-spacing: 0.28em;
+    text-indent: 0.28em;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    text-align: center;
+    min-height: 1.2em;
+  }
+  .loco.show { opacity: 0.72; }
 </style>
 </head>
 <body>
@@ -88,6 +98,7 @@
       <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
     <div class="name" id="name"></div>
+    <div class="loco" id="loco"></div>
   </div>
 
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
@@ -166,6 +177,20 @@
       overlay.classList.add("hidden");
       dropZips(5);
     });
+
+    // approximate, IP-based location — the visitor's own data, shown back to them
+    var locoEl = document.getElementById("loco");
+    fetch("https://ipwho.is/")
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d || d.success === false) throw new Error("no data");
+        var parts = [d.city, d.region, d.country].filter(Boolean);
+        locoEl.textContent = parts.length
+          ? "▸ WE SEE YOU IN " + parts.join(", ").toUpperCase()
+          : "";
+        if (locoEl.textContent) locoEl.classList.add("show");
+      })
+      .catch(function () { /* stays hidden if the lookup is blocked */ });
   </script>
 </body>
 </html>
