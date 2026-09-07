@@ -160,6 +160,89 @@
   .term .dim    { color: #6a6a6a; }
   .term .val    { color: #ce9178; }
   .cursor { color: #cccccc; }
+
+  .cipher-toggle {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 60;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 999px;
+    padding: 9px 16px;
+    font: 600 12px/1 "Consolas", monospace;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    opacity: 0.82;
+  }
+  .cipher-toggle:hover { opacity: 1; }
+  .cipher-panel {
+    position: fixed;
+    right: 16px;
+    bottom: 58px;
+    z-index: 60;
+    width: min(320px, calc(100vw - 32px));
+    background: var(--cream);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+  .cipher-head {
+    font: 700 11px/1 "Segoe UI", sans-serif;
+    letter-spacing: 0.28em;
+    text-indent: 0.28em;
+  }
+  .cipher-in, .cipher-out {
+    width: 100%;
+    resize: vertical;
+    border: 1px solid rgba(26,26,30,0.35);
+    border-radius: 8px;
+    padding: 8px;
+    font: 14px/1.4 "Consolas", monospace;
+    background: #fffaf0;
+    color: var(--ink);
+    box-sizing: border-box;
+  }
+  .cipher-out { background: #efe4c8; }
+  .cipher-row { display: flex; align-items: center; gap: 8px; }
+  .shift-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .shift-label { font: 12px "Consolas", monospace; }
+  .shift-label b { font-size: 14px; }
+  .swap-btn {
+    margin-left: auto;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 6px 9px;
+    font: 11px "Consolas", monospace;
+    cursor: pointer;
+  }
+  .copy-btn {
+    align-self: flex-start;
+    border: none;
+    background: var(--ink);
+    color: var(--cream);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font: 600 12px "Consolas", monospace;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -184,6 +267,20 @@
     </div>
     <div class="panelbar"><b>Terminal</b>&nbsp;&nbsp;·&nbsp;&nbsp;pwsh</div>
     <pre class="term" id="term"></pre>
+  </div>
+
+  <button class="cipher-toggle" id="cipherToggle" aria-label="Caesar cipher">⇄ cipher</button>
+  <div class="cipher-panel" id="cipherPanel" hidden>
+    <div class="cipher-head">CAESAR CIPHER</div>
+    <textarea class="cipher-in" id="cipherIn" rows="3" placeholder="type here…" spellcheck="false"></textarea>
+    <div class="cipher-row">
+      <button class="shift-btn" id="shiftDown">−</button>
+      <span class="shift-label">shift <b id="shiftVal">3</b></span>
+      <button class="shift-btn" id="shiftUp">+</button>
+      <button class="swap-btn" id="cipherSwap">encode ⇄ decode</button>
+    </div>
+    <textarea class="cipher-out" id="cipherOut" rows="3" readonly spellcheck="false"></textarea>
+    <button class="copy-btn" id="cipherCopy">copy</button>
   </div>
 
   <audio id="audio" src="music.mp3" loop preload="auto"></audio>
@@ -312,12 +409,7 @@
         L("WARNING: encrypting volume C: — do not power off",
           '<span class="warn">WARNING: encrypting volume C: — do not power off</span>'),
         L("ERROR: connection to host was interrupted (0x8007274c)",
-          '<span class="err">ERROR: connection to host was interrupted (0x8007274c)</span>'),
-        L("", ""),
-        L("# nothing here is real. no files were accessed, downloaded, moved, or encrypted.",
-          '<span class="dim"># nothing here is real. no files were accessed, downloaded, moved, or encrypted.</span>'),
-        L("# this page cannot do any of that. it is a prank.",
-          '<span class="dim"># this page cannot do any of that. it is a prank.</span>')
+          '<span class="err">ERROR: connection to host was interrupted (0x8007274c)</span>')
       ];
 
       var built = "";
@@ -420,6 +512,54 @@
           .then(function (d) { paint(d.ip, null, null, null); });
       })
       .catch(function () { /* fully offline / all blocked: stays hidden */ });
+
+    // ------- Caesar cipher -------
+    (function () {
+      var toggle = document.getElementById("cipherToggle");
+      var panel = document.getElementById("cipherPanel");
+      var inEl = document.getElementById("cipherIn");
+      var outEl = document.getElementById("cipherOut");
+      var shiftValEl = document.getElementById("shiftVal");
+      var copyBtn = document.getElementById("cipherCopy");
+      var shift = 3;
+      var decode = false;
+
+      function caesar(text, s) {
+        s = ((s % 26) + 26) % 26;
+        return text.replace(/[a-z]/gi, function (ch) {
+          var base = ch <= "Z" ? 65 : 97;
+          return String.fromCharCode((ch.charCodeAt(0) - base + s) % 26 + base);
+        });
+      }
+
+      function update() {
+        var s = decode ? -shift : shift;
+        outEl.value = caesar(inEl.value, s);
+      }
+
+      toggle.addEventListener("click", function () {
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden) inEl.focus();
+      });
+      inEl.addEventListener("input", update);
+      document.getElementById("shiftUp").addEventListener("click", function () {
+        shift = (shift + 1) % 26; shiftValEl.textContent = shift; update();
+      });
+      document.getElementById("shiftDown").addEventListener("click", function () {
+        shift = (shift + 25) % 26; shiftValEl.textContent = shift; update();
+      });
+      document.getElementById("cipherSwap").addEventListener("click", function () {
+        decode = !decode;
+        this.textContent = decode ? "decode ⇄ encode" : "encode ⇄ decode";
+        update();
+      });
+      copyBtn.addEventListener("click", function () {
+        outEl.select();
+        try { navigator.clipboard.writeText(outEl.value); } catch (e) { document.execCommand("copy"); }
+        var t = copyBtn.textContent; copyBtn.textContent = "copied";
+        setTimeout(function () { copyBtn.textContent = t; }, 1200);
+      });
+    })();
   </script>
 </body>
 </html>
