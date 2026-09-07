@@ -314,16 +314,8 @@
     document.getElementById("pwCancel").addEventListener("click", closeModal);
     modalBg.addEventListener("click", function (e) { if (e.target === modalBg) closeModal(); });
 
-    // The one key the puzzle earns. Guesses never match; only the solved key does,
-    // and even then there is no file — it reveals the ending.
-    var SOLUTION = "CASP3301";
+    // No payoff yet — every password is rejected, the solved key included.
     function attempt() {
-      var v = pw.value.trim().toUpperCase();
-      if (v === SOLUTION) {
-        modalBg.hidden = true;
-        document.getElementById("epilogue").hidden = false;
-        return;
-      }
       pwErr.textContent = "Incorrect password. Access denied.";
       modal.classList.remove("shake");
       void modal.offsetWidth;
