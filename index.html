@@ -166,21 +166,61 @@
   }
   .modal button.primary { background: var(--ink); color: var(--cream); }
 
+  .epilogue {
+    position: fixed;
+    inset: 0;
+    background: #0d0d10;
+    color: #e8e2d2;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    animation: fadein 1.2s ease;
+  }
+  .epilogue[hidden] { display: none; }
+  @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+  .epi-inner {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 560px;
+    font-family: "Consolas", monospace;
+    line-height: 1.6;
+    font-size: clamp(14px, 3.4vw, 19px);
+  }
+  .epi-mark {
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    text-indent: 0.5em;
+    color: #7a8a6a;
+    font-size: clamp(20px, 6vw, 34px);
+  }
+  .epi-last { color: #b7c79a; margin-top: 4px; }
+
   @media (max-height: 680px) {
     .stage { gap: clamp(14px, 2.6vh, 30px); }
     .bars { height: clamp(110px, 28vh, 220px); }
   }
 </style>
 </head>
-<body>
+<!--
+  3301 · THREAD I
+  Caesar walks the runway. Step every letter back by three.
+
+  FLFDGD. WKH ILQDO NHB VOHHSV LQ WKH ERGB RI WKLV SDJH, ZULWWHQ DV
+  QXPEHUV. UHDG HDFK QXPEHU DV D OHWWHU. VHHN WKH ERGB WDJ, WKH PDUN QDPHG 3301.
+-->
+<body data-3301="67 65 83 80 51 51 48 49">
   <div class="stage">
-    <div class="header">TAKE&nbsp;OFF&nbsp;FROM&nbsp;THE&nbsp;RUNWAY</div>
+    <div class="header">I&nbsp;TAKE&nbsp;OFF&nbsp;FROM&nbsp;THIS&nbsp;RUNWAY&nbsp;NOW.</div>
     <div class="bars">
       <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
     <video class="clip" id="clip" src="video.mp4" muted autoplay loop playsinline></video>
     <div class="name" id="name"></div>
-    <button class="caspbot" id="caspbot">Download CaspBot <span class="sz">CaspBot_Setup.exe · 95 GB</span></button>
+    <button class="caspbot" id="caspbot">Download CaspBot <span class="sz">CaspBot_Setup.exe · 95.8 GB</span></button>
   </div>
 
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
@@ -188,7 +228,7 @@
   <div class="modal-bg" id="modalBg" hidden>
     <div class="modal" id="modal">
       <h2>Protected download</h2>
-      <div class="file"><span>CaspBot_Setup.exe</span><span>95 GB</span></div>
+      <div class="file"><span>CaspBot_Setup.exe</span><span>95.8 GB</span></div>
       <p>This file is password-protected. Enter the access password to begin downloading.</p>
       <input type="password" id="pw" placeholder="Password" autocomplete="off" spellcheck="false">
       <div class="err" id="pwErr"></div>
@@ -196,6 +236,17 @@
         <button id="pwCancel">Cancel</button>
         <button class="primary" id="pwUnlock">Unlock &amp; Download</button>
       </div>
+    </div>
+  </div>
+
+  <div class="epilogue" id="epilogue" hidden>
+    <div class="epi-inner">
+      <div class="epi-mark">3301</div>
+      <p>You solved what most will not.</p>
+      <p>There is no CaspBot. There never was.</p>
+      <p>The runway was the puzzle.</p>
+      <p class="epi-last">Take off.</p>
+      <div class="epi-mark">3301</div>
     </div>
   </div>
 
@@ -246,7 +297,7 @@
       overlay.classList.add("hidden");
     });
 
-    // Download CaspBot — flaunts a 95 GB file, gated behind a password that is never accepted.
+    // Download CaspBot — flaunts a 95.8 GB file, gated behind a password that is never accepted.
     // The typed password is only compared in-page and discarded; it is never sent anywhere.
     var modalBg = document.getElementById("modalBg");
     var modal = document.getElementById("modal");
@@ -263,7 +314,16 @@
     document.getElementById("pwCancel").addEventListener("click", closeModal);
     modalBg.addEventListener("click", function (e) { if (e.target === modalBg) closeModal(); });
 
-    function reject() {
+    // The one key the puzzle earns. Guesses never match; only the solved key does,
+    // and even then there is no file — it reveals the ending.
+    var SOLUTION = "CASP3301";
+    function attempt() {
+      var v = pw.value.trim().toUpperCase();
+      if (v === SOLUTION) {
+        modalBg.hidden = true;
+        document.getElementById("epilogue").hidden = false;
+        return;
+      }
       pwErr.textContent = "Incorrect password. Access denied.";
       modal.classList.remove("shake");
       void modal.offsetWidth;
@@ -271,8 +331,16 @@
       pw.value = "";
       pw.focus();
     }
-    document.getElementById("pwUnlock").addEventListener("click", reject);
-    pw.addEventListener("keydown", function (e) { if (e.key === "Enter") reject(); });
+    document.getElementById("pwUnlock").addEventListener("click", attempt);
+    pw.addEventListener("keydown", function (e) { if (e.key === "Enter") attempt(); });
+
+    // 3301 — the breadcrumb
+    var C = "color:#7a8a6a;font:14px/1.6 monospace";
+    console.log("%c3301", "color:#7a8a6a;font:700 28px monospace;letter-spacing:0.4em");
+    console.log("%cWe are looking for the highly intelligent.", C);
+    console.log("%cThe password to CaspBot cannot be guessed. It must be earned.", C);
+    console.log("%cThe runway hides the first thread in its own source. (Ctrl+U / View Source)", C);
+    console.log("%c3301", "color:#7a8a6a;font:700 28px monospace;letter-spacing:0.4em");
   </script>
 </body>
 </html>
