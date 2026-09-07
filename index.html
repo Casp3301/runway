@@ -25,7 +25,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(24px, 5vh, 60px);
+    gap: clamp(22px, 4.5vh, 52px);
     padding: 6vh 5vw;
   }
   .header {
@@ -39,18 +39,20 @@
   .bars {
     display: flex;
     gap: clamp(14px, 3.2vw, 34px);
-    height: clamp(160px, 40vh, 340px);
+    height: clamp(150px, 36vh, 320px);
   }
-  .bar {
-    width: clamp(20px, 4.4vw, 46px);
-    border-radius: 999px;
-    height: 100%;
-  }
+  .bar { width: clamp(20px, 4.4vw, 46px); border-radius: 999px; height: 100%; }
   .bar:nth-child(1) { background: #d6281a; }
   .bar:nth-child(2) { background: #f36a21; }
   .bar:nth-child(3) { background: #f7b51e; }
   .bar:nth-child(4) { background: #00b050; }
   .bar:nth-child(5) { background: #1d2d6a; }
+  .clip {
+    width: clamp(150px, 26vw, 260px);
+    height: auto;
+    border-radius: 10px;
+    display: block;
+  }
   .name {
     font-size: clamp(26px, 6vw, 52px);
     font-weight: 700;
@@ -60,6 +62,28 @@
     line-height: 1.2;
     transition: opacity 180ms ease;
   }
+  .caspbot {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 999px;
+    padding: 13px 22px;
+    font: 600 15px/1 "Segoe UI", sans-serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 120ms ease;
+  }
+  .caspbot:hover { transform: translateY(-1px); }
+  .caspbot .sz {
+    font: 500 12px/1 "Consolas", monospace;
+    opacity: 0.72;
+    padding-left: 12px;
+    border-left: 1px solid rgba(245,232,205,0.4);
+  }
+
   .overlay {
     position: fixed;
     inset: 0;
@@ -79,169 +103,72 @@
     border-radius: 999px;
   }
   .overlay.hidden { display: none; }
-  .clip {
-    width: clamp(150px, 26vw, 260px);
-    height: auto;
-    border-radius: 10px;
-    display: block;
-  }
-  .loco {
-    font-size: clamp(11px, 2.2vw, 14px);
-    letter-spacing: 0.28em;
-    text-indent: 0.28em;
-    opacity: 0;
-    transition: opacity 500ms ease;
-    text-align: center;
-    min-height: 1.2em;
-  }
-  .loco.show { opacity: 0.72; }
-  .loco br { line-height: 2; }
 
-  @media (max-height: 680px) {
-    .stage { gap: clamp(16px, 3vh, 34px); }
-    .bars { height: clamp(120px, 32vh, 240px); }
-  }
-
-  /* muted VSCode integrated-terminal aesthetic — no glow, no scanlines */
-  .breach {
+  /* password gate */
+  .modal-bg {
     position: fixed;
     inset: 0;
-    background: #1e1e1e;
-    color: #cccccc;
-    font-family: Consolas, "Cascadia Mono", "SF Mono", Menlo, "Courier New", monospace;
-    z-index: 50;
-    display: none;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-  .breach.on { display: flex; flex-direction: column; }
-  .titlebar {
-    flex: 0 0 auto;
-    height: 30px;
-    background: #323233;
-    color: #cccccc;
+    background: rgba(20,20,24,0.55);
     display: flex;
     align-items: center;
-    padding: 0 12px;
-    font-size: 12px;
-    border-bottom: 1px solid #252526;
+    justify-content: center;
+    z-index: 30;
+    padding: 20px;
   }
-  .titlebar .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
-  .titlebar .r { background: #ff5f56; }
-  .titlebar .y { background: #ffbd2e; }
-  .titlebar .g { background: #27c93f; }
-  .titlebar .file { margin-left: 14px; color: #969696; }
-  .panelbar {
-    flex: 0 0 auto;
-    background: #252526;
-    color: #969696;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    padding: 6px 14px;
-    border-bottom: 1px solid #1b1b1b;
-    text-transform: uppercase;
-  }
-  .panelbar b { color: #d4d4d4; font-weight: 600; border-bottom: 1px solid #007acc; padding-bottom: 6px; }
-  .term {
-    flex: 1 1 auto;
-    margin: 0;
-    padding: 12px 14px;
-    font-size: clamp(11px, 2.3vw, 13.5px);
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-y: auto;
-  }
-  .term .prompt { color: #4ec9b0; }
-  .term .path   { color: #569cd6; }
-  .term .ok     { color: #6a9955; }
-  .term .warn   { color: #d7ba7d; }
-  .term .err    { color: #f14c4c; }
-  .term .dim    { color: #6a6a6a; }
-  .term .val    { color: #ce9178; }
-  .cursor { color: #cccccc; }
-
-  .cipher-toggle {
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    z-index: 60;
-    background: var(--ink);
-    color: var(--cream);
-    border: none;
-    border-radius: 999px;
-    padding: 9px 16px;
-    font: 600 12px/1 "Consolas", monospace;
-    letter-spacing: 0.12em;
-    cursor: pointer;
-    opacity: 0.82;
-  }
-  .cipher-toggle:hover { opacity: 1; }
-  .cipher-panel {
-    position: fixed;
-    right: 16px;
-    bottom: 58px;
-    z-index: 60;
-    width: min(320px, calc(100vw - 32px));
+  .modal-bg[hidden] { display: none; }
+  .modal {
+    width: min(380px, 100%);
     background: var(--cream);
-    color: var(--ink);
     border: 1.5px solid var(--ink);
-    border-radius: 12px;
-    padding: 14px;
+    border-radius: 14px;
+    padding: 22px;
     display: flex;
     flex-direction: column;
-    gap: 9px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    gap: 14px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
   }
-  .cipher-head {
-    font: 700 11px/1 "Segoe UI", sans-serif;
-    letter-spacing: 0.28em;
-    text-indent: 0.28em;
+  .modal.shake { animation: shake 0.32s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
   }
-  .cipher-in, .cipher-out {
-    width: 100%;
-    resize: vertical;
-    border: 1px solid rgba(26,26,30,0.35);
+  .modal h2 { font-size: 17px; font-weight: 800; letter-spacing: 0.01em; }
+  .modal .file {
+    display: flex;
+    justify-content: space-between;
+    font: 13px/1.4 "Consolas", monospace;
+    background: #efe4c8;
     border-radius: 8px;
-    padding: 8px;
-    font: 14px/1.4 "Consolas", monospace;
+    padding: 10px 12px;
+  }
+  .modal p { font-size: 13px; line-height: 1.5; opacity: 0.85; }
+  .modal input {
+    border: 1px solid rgba(26,26,30,0.4);
+    border-radius: 8px;
+    padding: 11px 12px;
+    font: 15px "Consolas", monospace;
     background: #fffaf0;
     color: var(--ink);
-    box-sizing: border-box;
   }
-  .cipher-out { background: #efe4c8; }
-  .cipher-row { display: flex; align-items: center; gap: 8px; }
-  .shift-btn {
-    width: 30px; height: 30px;
+  .modal .err { color: #c0271a; font-size: 12.5px; min-height: 1.2em; }
+  .modal .actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal button {
     border: 1px solid var(--ink);
+    border-radius: 8px;
+    padding: 10px 16px;
+    font: 600 13px "Segoe UI", sans-serif;
+    cursor: pointer;
     background: transparent;
     color: var(--ink);
-    border-radius: 8px;
-    font-size: 17px;
-    cursor: pointer;
-    line-height: 1;
   }
-  .shift-label { font: 12px "Consolas", monospace; }
-  .shift-label b { font-size: 14px; }
-  .swap-btn {
-    margin-left: auto;
-    border: 1px solid var(--ink);
-    background: transparent;
-    color: var(--ink);
-    border-radius: 8px;
-    padding: 6px 9px;
-    font: 11px "Consolas", monospace;
-    cursor: pointer;
-  }
-  .copy-btn {
-    align-self: flex-start;
-    border: none;
-    background: var(--ink);
-    color: var(--cream);
-    border-radius: 8px;
-    padding: 7px 14px;
-    font: 600 12px "Consolas", monospace;
-    cursor: pointer;
+  .modal button.primary { background: var(--ink); color: var(--cream); }
+
+  @media (max-height: 680px) {
+    .stage { gap: clamp(14px, 2.6vh, 30px); }
+    .bars { height: clamp(110px, 28vh, 220px); }
   }
 </style>
 </head>
@@ -253,34 +180,23 @@
     </div>
     <video class="clip" id="clip" src="video.mp4" muted autoplay loop playsinline></video>
     <div class="name" id="name"></div>
-    <div class="loco" id="loco"></div>
-    <div class="loco exact" id="exact"></div>
+    <button class="caspbot" id="caspbot">Download CaspBot <span class="sz">CaspBot_Setup.exe · 95 GB</span></button>
   </div>
 
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
 
-  <div class="breach" id="breach" aria-hidden="true">
-    <div class="titlebar">
-      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-      <span>Windows PowerShell</span>
-      <span class="file">— session.log</span>
+  <div class="modal-bg" id="modalBg" hidden>
+    <div class="modal" id="modal">
+      <h2>Protected download</h2>
+      <div class="file"><span>CaspBot_Setup.exe</span><span>95 GB</span></div>
+      <p>This file is password-protected. Enter the access password to begin downloading.</p>
+      <input type="password" id="pw" placeholder="Password" autocomplete="off" spellcheck="false">
+      <div class="err" id="pwErr"></div>
+      <div class="actions">
+        <button id="pwCancel">Cancel</button>
+        <button class="primary" id="pwUnlock">Unlock &amp; Download</button>
+      </div>
     </div>
-    <div class="panelbar"><b>Terminal</b>&nbsp;&nbsp;·&nbsp;&nbsp;pwsh</div>
-    <pre class="term" id="term"></pre>
-  </div>
-
-  <button class="cipher-toggle" id="cipherToggle" aria-label="Caesar cipher">⇄ cipher</button>
-  <div class="cipher-panel" id="cipherPanel" hidden>
-    <div class="cipher-head">CAESAR CIPHER</div>
-    <textarea class="cipher-in" id="cipherIn" rows="3" placeholder="type here…" spellcheck="false"></textarea>
-    <div class="cipher-row">
-      <button class="shift-btn" id="shiftDown">−</button>
-      <span class="shift-label">shift <b id="shiftVal">3</b></span>
-      <button class="shift-btn" id="shiftUp">+</button>
-      <button class="swap-btn" id="cipherSwap">encode ⇄ decode</button>
-    </div>
-    <textarea class="cipher-out" id="cipherOut" rows="3" readonly spellcheck="false"></textarea>
-    <button class="copy-btn" id="cipherCopy">copy</button>
   </div>
 
   <audio id="audio" src="music.mp3" loop preload="auto"></audio>
@@ -299,16 +215,13 @@
     ];
 
     var nameEl = document.getElementById("name");
-    var idx = 0;
-    var hue = 0;
+    var idx = 0, hue = 0;
 
-    // hue rotates continuously; the name recolors every frame
     function tick() {
       hue = (hue + 0.9) % 360;
       nameEl.style.color = "hsl(" + hue + ", 75%, 42%)";
       requestAnimationFrame(tick);
     }
-
     function swap() {
       nameEl.style.opacity = "0";
       setTimeout(function () {
@@ -317,249 +230,49 @@
         nameEl.style.opacity = "1";
       }, 180);
     }
-
     nameEl.textContent = names[0];
     idx = 1;
     tick();
     setInterval(swap, 620);
 
-    // a valid but empty zip is just a 22-byte End-Of-Central-Directory record
-    function emptyZipBlob() {
-      var eocd = new Uint8Array([
-        0x50, 0x4b, 0x05, 0x06,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-      ]);
-      return new Blob([eocd], { type: "application/zip" });
-    }
-
-    function dropZips(n) {
-      for (var i = 1; i <= n; i++) {
-        (function (k) {
-          setTimeout(function () {
-            var url = URL.createObjectURL(emptyZipBlob());
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = "runway_" + k + ".zip";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-          }, k * 250);
-        })(i);
-      }
-    }
-
     var overlay = document.getElementById("overlay");
     var audio = document.getElementById("audio");
+    var clip = document.getElementById("clip");
     overlay.addEventListener("click", function () {
       audio.volume = 1;
       audio.play().catch(function () {});
-      overlay.classList.add("hidden");
-      var clip = document.getElementById("clip");
       clip.muted = true;
       clip.play().catch(function () {});
-      dropZips(5);
-      askExact();
-      setTimeout(startBreach, 2600);
+      overlay.classList.add("hidden");
     });
 
-    // ------- breach gag: all cosmetic, nothing leaves the browser -------
-    function esc(s) {
-      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // Download CaspBot — flaunts a 95 GB file, gated behind a password that is never accepted.
+    // The typed password is only compared in-page and discarded; it is never sent anywhere.
+    var modalBg = document.getElementById("modalBg");
+    var modal = document.getElementById("modal");
+    var pw = document.getElementById("pw");
+    var pwErr = document.getElementById("pwErr");
+
+    document.getElementById("caspbot").addEventListener("click", function () {
+      pw.value = "";
+      pwErr.textContent = "";
+      modalBg.hidden = false;
+      pw.focus();
+    });
+    function closeModal() { modalBg.hidden = true; }
+    document.getElementById("pwCancel").addEventListener("click", closeModal);
+    modalBg.addEventListener("click", function (e) { if (e.target === modalBg) closeModal(); });
+
+    function reject() {
+      pwErr.textContent = "Incorrect password. Access denied.";
+      modal.classList.remove("shake");
+      void modal.offsetWidth;
+      modal.classList.add("shake");
+      pw.value = "";
+      pw.focus();
     }
-
-    var breachStarted = false;
-    function startBreach() {
-      if (breachStarted) return;
-      breachStarted = true;
-
-      var breach = document.getElementById("breach");
-      var term = document.getElementById("term");
-      breach.classList.add("on");
-
-      var ip = netInfo.ip || "0.0.0.0";
-      var place = netInfo.place || "unknown";
-
-      // each entry: [plain text for typing, html-wrapped final form]
-      function L(txt, html) { return { txt: txt, html: html }; }
-      var P = '<span class="prompt">PS C:\\WINDOWS\\system32&gt;</span> ';
-      var lines = [
-        L("PS C:\\WINDOWS\\system32> Import-Module RemoteAccess",
-          P + '<span class="path">Import-Module</span> RemoteAccess'),
-        L("Establishing secure channel ... connected",
-          '<span class="dim">Establishing secure channel ... </span><span class="ok">connected</span>'),
-        L("Get-HostIdentity", P + '<span class="path">Get-HostIdentity</span>'),
-        L("  PublicAddress : " + ip,
-          '<span class="dim">  PublicAddress : </span><span class="val">' + esc(ip) + '</span>'),
-        L("  Location      : " + place,
-          '<span class="dim">  Location      : </span><span class="val">' + esc(place) + '</span>'),
-        L("Get-LocalDevice -Enumerate",
-          P + '<span class="path">Get-LocalDevice</span> -Enumerate'),
-        L("  Camera        Granted", '<span class="dim">  Camera        </span><span class="ok">Granted</span>'),
-        L("  Microphone    Granted", '<span class="dim">  Microphone    </span><span class="ok">Granted</span>'),
-        L("  Clipboard     Granted", '<span class="dim">  Clipboard     </span><span class="ok">Granted</span>'),
-        L("Copy-UserData -Path ~\\Pictures  -Dest remote",
-          P + '<span class="path">Copy-UserData</span> -Path ~\\Pictures  <span class="ok">[done]</span>'),
-        L("Copy-UserData -Path ~\\Documents -Dest remote",
-          P + '<span class="path">Copy-UserData</span> -Path ~\\Documents <span class="ok">[done]</span>'),
-        L("Copy-UserData -Path Credentials -Dest remote",
-          P + '<span class="path">Copy-UserData</span> -Path Credentials <span class="ok">[done]</span>'),
-        L("Start-DiskEncryption -Drive C:",
-          P + '<span class="path">Start-DiskEncryption</span> -Drive C:'),
-        L("WARNING: encrypting volume C: — do not power off",
-          '<span class="warn">WARNING: encrypting volume C: — do not power off</span>'),
-        L("ERROR: connection to host was interrupted (0x8007274c)",
-          '<span class="err">ERROR: connection to host was interrupted (0x8007274c)</span>')
-      ];
-
-      var built = "";
-      var li = 0, ci = 0;
-
-      function render(partialPlain) {
-        // completed lines as html + current line typed as plain text + cursor
-        term.innerHTML = built + esc(partialPlain) + '<span class="cursor">\u2588</span>';
-        term.scrollTop = term.scrollHeight;
-      }
-
-      function type() {
-        if (li >= lines.length) { term.innerHTML = built.replace(/\n$/, ""); return; }
-        var line = lines[li];
-        if (ci < line.txt.length) {
-          ci++;
-          render(line.txt.slice(0, ci));
-          setTimeout(type, 10 + Math.random() * 20);
-        } else {
-          built += line.html + "\n";
-          li++; ci = 0;
-          render("");
-          // small pause between lines; longer before the encrypt/error beats
-          var pause = 90 + Math.random() * 180;
-          if (li === 13 || li === 14) pause = 700;
-          setTimeout(type, pause);
-        }
-      }
-
-      type();
-    }
-
-    // precise GPS — browser shows an Allow/Block prompt; result is only shown here
-    var exactEl = document.getElementById("exact");
-    function askExact() {
-      if (!navigator.geolocation) return;
-      exactEl.textContent = "📍 PINPOINTING…";
-      exactEl.classList.add("show");
-      navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          var lat = pos.coords.latitude;
-          var lng = pos.coords.longitude;
-          var acc = Math.round(pos.coords.accuracy);
-          exactEl.textContent =
-            "📍 " + lat.toFixed(5) + ", " + lng.toFixed(5) + "  (±" + acc + "m)";
-          fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" +
-                lat + "&lon=" + lng)
-            .then(function (r) { return r.json(); })
-            .then(function (d) {
-              if (d && d.display_name) {
-                exactEl.innerHTML =
-                  "📍 " + d.display_name.toUpperCase() +
-                  "<br>" + lat.toFixed(5) + ", " + lng.toFixed(5) + "  (±" + acc + "m)";
-              }
-            })
-            .catch(function () { /* keep the raw coords */ });
-        },
-        function () {
-          // denied or unavailable — drop the pinpoint line, IP line still stands
-          exactEl.textContent = "";
-          exactEl.classList.remove("show");
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    }
-
-    // approximate, IP-based location — the visitor's own data, shown back to them
-    var locoEl = document.getElementById("loco");
-
-    var netInfo = { ip: null, place: null };
-    function paint(ip, city, region, country) {
-      var place = [city, region, country].filter(Boolean).join(", ");
-      netInfo.ip = ip || netInfo.ip;
-      if (place) netInfo.place = place;
-      var html = "";
-      if (place) html += "▸ WE SEE YOU IN " + place.toUpperCase();
-      if (ip) html += (html ? "<br>" : "") + "IP · " + ip;
-      if (html) { locoEl.innerHTML = html; locoEl.classList.add("show"); }
-    }
-
-    // provider chain — if one host is blocked on mobile, fall back to the next
-    fetch("https://ipwho.is/")
-      .then(function (r) { return r.json(); })
-      .then(function (d) {
-        if (!d || d.success === false) throw new Error("no data");
-        paint(d.ip, d.city, d.region, d.country);
-      })
-      .catch(function () {
-        return fetch("https://ipapi.co/json/")
-          .then(function (r) { return r.json(); })
-          .then(function (d) {
-            if (!d || d.error) throw new Error("no data");
-            paint(d.ip, d.city, d.region, d.country_name);
-          });
-      })
-      .catch(function () {
-        // last resort: at least show the IP
-        return fetch("https://api.ipify.org?format=json")
-          .then(function (r) { return r.json(); })
-          .then(function (d) { paint(d.ip, null, null, null); });
-      })
-      .catch(function () { /* fully offline / all blocked: stays hidden */ });
-
-    // ------- Caesar cipher -------
-    (function () {
-      var toggle = document.getElementById("cipherToggle");
-      var panel = document.getElementById("cipherPanel");
-      var inEl = document.getElementById("cipherIn");
-      var outEl = document.getElementById("cipherOut");
-      var shiftValEl = document.getElementById("shiftVal");
-      var copyBtn = document.getElementById("cipherCopy");
-      var shift = 3;
-      var decode = false;
-
-      function caesar(text, s) {
-        s = ((s % 26) + 26) % 26;
-        return text.replace(/[a-z]/gi, function (ch) {
-          var base = ch <= "Z" ? 65 : 97;
-          return String.fromCharCode((ch.charCodeAt(0) - base + s) % 26 + base);
-        });
-      }
-
-      function update() {
-        var s = decode ? -shift : shift;
-        outEl.value = caesar(inEl.value, s);
-      }
-
-      toggle.addEventListener("click", function () {
-        panel.hidden = !panel.hidden;
-        if (!panel.hidden) inEl.focus();
-      });
-      inEl.addEventListener("input", update);
-      document.getElementById("shiftUp").addEventListener("click", function () {
-        shift = (shift + 1) % 26; shiftValEl.textContent = shift; update();
-      });
-      document.getElementById("shiftDown").addEventListener("click", function () {
-        shift = (shift + 25) % 26; shiftValEl.textContent = shift; update();
-      });
-      document.getElementById("cipherSwap").addEventListener("click", function () {
-        decode = !decode;
-        this.textContent = decode ? "decode ⇄ encode" : "encode ⇄ decode";
-        update();
-      });
-      copyBtn.addEventListener("click", function () {
-        outEl.select();
-        try { navigator.clipboard.writeText(outEl.value); } catch (e) { document.execCommand("copy"); }
-        var t = copyBtn.textContent; copyBtn.textContent = "copied";
-        setTimeout(function () { copyBtn.textContent = t; }, 1200);
-      });
-    })();
+    document.getElementById("pwUnlock").addEventListener("click", reject);
+    pw.addEventListener("keydown", function (e) { if (e.key === "Enter") reject(); });
   </script>
 </body>
 </html>
