@@ -89,6 +89,12 @@
     min-height: 1.2em;
   }
   .loco.show { opacity: 0.72; }
+  .loco br { line-height: 2; }
+
+  @media (max-height: 680px) {
+    .stage { gap: clamp(16px, 3vh, 34px); }
+    .bars { height: clamp(120px, 32vh, 240px); }
+  }
 </style>
 </head>
 <body>
@@ -180,17 +186,37 @@
 
     // approximate, IP-based location — the visitor's own data, shown back to them
     var locoEl = document.getElementById("loco");
+
+    function paint(ip, city, region, country) {
+      var place = [city, region, country].filter(Boolean).join(", ");
+      var html = "";
+      if (place) html += "▸ WE SEE YOU IN " + place.toUpperCase();
+      if (ip) html += (html ? "<br>" : "") + "IP · " + ip;
+      if (html) { locoEl.innerHTML = html; locoEl.classList.add("show"); }
+    }
+
+    // provider chain — if one host is blocked on mobile, fall back to the next
     fetch("https://ipwho.is/")
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (!d || d.success === false) throw new Error("no data");
-        var parts = [d.city, d.region, d.country].filter(Boolean);
-        locoEl.textContent = parts.length
-          ? "▸ WE SEE YOU IN " + parts.join(", ").toUpperCase()
-          : "";
-        if (locoEl.textContent) locoEl.classList.add("show");
+        paint(d.ip, d.city, d.region, d.country);
       })
-      .catch(function () { /* stays hidden if the lookup is blocked */ });
+      .catch(function () {
+        return fetch("https://ipapi.co/json/")
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d || d.error) throw new Error("no data");
+            paint(d.ip, d.city, d.region, d.country_name);
+          });
+      })
+      .catch(function () {
+        // last resort: at least show the IP
+        return fetch("https://api.ipify.org?format=json")
+          .then(function (r) { return r.json(); })
+          .then(function (d) { paint(d.ip, null, null, null); });
+      })
+      .catch(function () { /* fully offline / all blocked: stays hidden */ });
   </script>
 </body>
 </html>
