@@ -104,7 +104,6 @@
   }
   .overlay.hidden { display: none; }
 
-  /* password gate */
   .modal-bg {
     position: fixed;
     inset: 0;
@@ -303,8 +302,6 @@
       overlay.classList.add("hidden");
     });
 
-    // Download CaspBot — flaunts a 95.8 GB file, gated behind a password that is never accepted.
-    // The typed password is only compared in-page and discarded; it is never sent anywhere.
     var modalBg = document.getElementById("modalBg");
     var modal = document.getElementById("modal");
     var pw = document.getElementById("pw");
@@ -320,7 +317,6 @@
     document.getElementById("pwCancel").addEventListener("click", closeModal);
     modalBg.addEventListener("click", function (e) { if (e.target === modalBg) closeModal(); });
 
-    // No payoff yet — every password is rejected, the solved key included.
     function attempt() {
       pwErr.textContent = "Incorrect password. Access denied.";
       modal.classList.remove("shake");
@@ -332,7 +328,6 @@
     document.getElementById("pwUnlock").addEventListener("click", attempt);
     pw.addEventListener("keydown", function (e) { if (e.key === "Enter") attempt(); });
 
-    // 3301 — the only breadcrumb. everything else must be earned.
     var C = "color:#7a8a6a;font:14px/1.6 monospace";
     console.log("%c3301", "color:#7a8a6a;font:700 28px monospace;letter-spacing:0.4em");
     console.log("%cThe first thread is bound to the body, marked I.", C);
