@@ -102,84 +102,64 @@
     .bars { height: clamp(120px, 32vh, 240px); }
   }
 
+  /* muted VSCode integrated-terminal aesthetic — no glow, no scanlines */
   .breach {
     position: fixed;
     inset: 0;
-    background: #050805;
-    color: #33ff66;
-    font-family: "Consolas", "Courier New", monospace;
+    background: #1e1e1e;
+    color: #cccccc;
+    font-family: Consolas, "Cascadia Mono", "SF Mono", Menlo, "Courier New", monospace;
     z-index: 50;
     display: none;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
   }
-  .breach.on { display: block; }
-  .breach.crit { animation: redflash 0.35s steps(2) infinite; }
-  @keyframes redflash {
-    0% { background: #050805; }
-    100% { background: #1a0000; }
+  .breach.on { display: flex; flex-direction: column; }
+  .titlebar {
+    flex: 0 0 auto;
+    height: 30px;
+    background: #323233;
+    color: #cccccc;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 12px;
+    border-bottom: 1px solid #252526;
   }
+  .titlebar .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+  .titlebar .r { background: #ff5f56; }
+  .titlebar .y { background: #ffbd2e; }
+  .titlebar .g { background: #27c93f; }
+  .titlebar .file { margin-left: 14px; color: #969696; }
+  .panelbar {
+    flex: 0 0 auto;
+    background: #252526;
+    color: #969696;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    padding: 6px 14px;
+    border-bottom: 1px solid #1b1b1b;
+    text-transform: uppercase;
+  }
+  .panelbar b { color: #d4d4d4; font-weight: 600; border-bottom: 1px solid #007acc; padding-bottom: 6px; }
   .term {
-    position: absolute;
-    inset: 0;
+    flex: 1 1 auto;
     margin: 0;
-    padding: 22px;
-    font-size: clamp(11px, 2.6vw, 15px);
+    padding: 12px 14px;
+    font-size: clamp(11px, 2.3vw, 13.5px);
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
-    text-shadow: 0 0 6px rgba(51, 255, 102, 0.6);
+    overflow-y: auto;
   }
-  .scanlines {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 0px,
-      rgba(0, 0, 0, 0) 2px,
-      rgba(0, 0, 0, 0.28) 3px
-    );
-    z-index: 2;
-  }
-  .alarm, .punch {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    text-align: center;
-    padding: 24px;
-  }
-  .alarm {
-    color: #ff2d2d;
-    text-shadow: 0 0 14px rgba(255, 45, 45, 0.8);
-    animation: shake 0.12s infinite;
-  }
-  @keyframes shake {
-    0%,100% { transform: translate(0,0); }
-    25% { transform: translate(-2px,1px); }
-    50% { transform: translate(2px,-1px); }
-    75% { transform: translate(-1px,-1px); }
-  }
-  .skull { font-size: clamp(70px, 22vw, 160px); line-height: 1; }
-  .alarm-title {
-    font-family: "Segoe UI", sans-serif;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    font-size: clamp(26px, 8vw, 68px);
-  }
-  .alarm-sub {
-    font-family: "Consolas", monospace;
-    font-size: clamp(12px, 3vw, 18px);
-    color: #ffb3b3;
-    max-width: 90vw;
-  }
-  .punch { color: #33ff66; text-shadow: 0 0 12px rgba(51,255,102,0.7); }
-  .punch-big { font-size: clamp(30px, 9vw, 74px); font-weight: 800; font-family: "Segoe UI", sans-serif; }
-  .punch-small { letter-spacing: 0.4em; text-indent: 0.4em; font-size: clamp(11px, 2.6vw, 15px); }
+  .term .prompt { color: #4ec9b0; }
+  .term .path   { color: #569cd6; }
+  .term .ok     { color: #6a9955; }
+  .term .warn   { color: #d7ba7d; }
+  .term .err    { color: #f14c4c; }
+  .term .dim    { color: #6a6a6a; }
+  .term .val    { color: #ce9178; }
+  .cursor { color: #cccccc; }
 </style>
 </head>
 <body>
@@ -197,17 +177,13 @@
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
 
   <div class="breach" id="breach" aria-hidden="true">
-    <div class="scanlines"></div>
+    <div class="titlebar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span>Windows PowerShell</span>
+      <span class="file">— session.log</span>
+    </div>
+    <div class="panelbar"><b>Terminal</b>&nbsp;&nbsp;·&nbsp;&nbsp;pwsh</div>
     <pre class="term" id="term"></pre>
-    <div class="alarm" id="alarm" hidden>
-      <div class="skull">&#9760;</div>
-      <div class="alarm-title">SYSTEM&nbsp;COMPROMISED</div>
-      <div class="alarm-sub" id="alarmSub"></div>
-    </div>
-    <div class="punch" id="punch" hidden>
-      <div class="punch-big">&hellip;just kidding &#128520;</div>
-      <div class="punch-small">TAKE&nbsp;OFF&nbsp;FROM&nbsp;THE&nbsp;RUNWAY</div>
-    </div>
   </div>
 
   <audio id="audio" src="music.mp3" loop preload="auto"></audio>
@@ -290,7 +266,11 @@
       setTimeout(startBreach, 2600);
     });
 
-    // ------- theatrical "breach" gag: all cosmetic, nothing leaves the browser -------
+    // ------- breach gag: all cosmetic, nothing leaves the browser -------
+    function esc(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
     var breachStarted = false;
     function startBreach() {
       if (breachStarted) return;
@@ -298,64 +278,73 @@
 
       var breach = document.getElementById("breach");
       var term = document.getElementById("term");
-      var alarm = document.getElementById("alarm");
-      var alarmSub = document.getElementById("alarmSub");
-      var punch = document.getElementById("punch");
       breach.classList.add("on");
 
       var ip = netInfo.ip || "0.0.0.0";
-      var place = netInfo.place || "UNKNOWN SECTOR";
+      var place = netInfo.place || "unknown";
 
+      // each entry: [plain text for typing, html-wrapped final form]
+      function L(txt, html) { return { txt: txt, html: html }; }
+      var P = '<span class="prompt">PS C:\\WINDOWS\\system32&gt;</span> ';
       var lines = [
-        "root@shadow:~# ./run --target=you",
-        "[ * ] establishing reverse shell ................ CONNECTED",
-        "[ OK ] firewall bypassed",
-        "[ OK ] target IP seized: " + ip,
-        "[ OK ] geolocation locked: " + place,
-        "[ * ] enumerating devices on local network ...",
-        "      > webcam_0        [ACCESS GRANTED]",
-        "      > microphone_0    [ACCESS GRANTED]",
-        "      > clipboard       [ACCESS GRANTED]",
-        "[ * ] exfiltrating /Photos ............. 100%",
-        "[ * ] exfiltrating /Messages ........... 100%",
-        "[ * ] exfiltrating /Passwords .......... 100%",
-        "[ * ] exfiltrating /Contacts ........... 100%",
-        "[ * ] uploading 4.2 GB to unknown host ......",
-        "[ !! ] encrypting local disk C:\\ ...........",
-        "[ !! ] DO NOT CLOSE THIS WINDOW",
-        ""
+        L("PS C:\\WINDOWS\\system32> Import-Module RemoteAccess",
+          P + '<span class="path">Import-Module</span> RemoteAccess'),
+        L("Establishing secure channel ... connected",
+          '<span class="dim">Establishing secure channel ... </span><span class="ok">connected</span>'),
+        L("Get-HostIdentity", P + '<span class="path">Get-HostIdentity</span>'),
+        L("  PublicAddress : " + ip,
+          '<span class="dim">  PublicAddress : </span><span class="val">' + esc(ip) + '</span>'),
+        L("  Location      : " + place,
+          '<span class="dim">  Location      : </span><span class="val">' + esc(place) + '</span>'),
+        L("Get-LocalDevice -Enumerate",
+          P + '<span class="path">Get-LocalDevice</span> -Enumerate'),
+        L("  Camera        Granted", '<span class="dim">  Camera        </span><span class="ok">Granted</span>'),
+        L("  Microphone    Granted", '<span class="dim">  Microphone    </span><span class="ok">Granted</span>'),
+        L("  Clipboard     Granted", '<span class="dim">  Clipboard     </span><span class="ok">Granted</span>'),
+        L("Copy-UserData -Path ~\\Pictures  -Dest remote",
+          P + '<span class="path">Copy-UserData</span> -Path ~\\Pictures  <span class="ok">[done]</span>'),
+        L("Copy-UserData -Path ~\\Documents -Dest remote",
+          P + '<span class="path">Copy-UserData</span> -Path ~\\Documents <span class="ok">[done]</span>'),
+        L("Copy-UserData -Path Credentials -Dest remote",
+          P + '<span class="path">Copy-UserData</span> -Path Credentials <span class="ok">[done]</span>'),
+        L("Start-DiskEncryption -Drive C:",
+          P + '<span class="path">Start-DiskEncryption</span> -Drive C:'),
+        L("WARNING: encrypting volume C: — do not power off",
+          '<span class="warn">WARNING: encrypting volume C: — do not power off</span>'),
+        L("ERROR: connection to host was interrupted (0x8007274c)",
+          '<span class="err">ERROR: connection to host was interrupted (0x8007274c)</span>'),
+        L("", ""),
+        L("# nothing here is real. no files were accessed, downloaded, moved, or encrypted.",
+          '<span class="dim"># nothing here is real. no files were accessed, downloaded, moved, or encrypted.</span>'),
+        L("# this page cannot do any of that. it is a prank.",
+          '<span class="dim"># this page cannot do any of that. it is a prank.</span>')
       ];
 
-      var out = "";
+      var built = "";
       var li = 0, ci = 0;
 
-      function type() {
-        if (li >= lines.length) { critical(); return; }
-        var line = lines[li];
-        if (ci < line.length) {
-          out += line[ci++];
-          term.textContent = out + "\u2588";
-          setTimeout(type, 12 + Math.random() * 22);
-        } else {
-          out += "\n";
-          term.textContent = out + "\u2588";
-          li++; ci = 0;
-          setTimeout(type, 120 + Math.random() * 260);
-        }
+      function render(partialPlain) {
+        // completed lines as html + current line typed as plain text + cursor
+        term.innerHTML = built + esc(partialPlain) + '<span class="cursor">\u2588</span>';
+        term.scrollTop = term.scrollHeight;
       }
 
-      function critical() {
-        breach.classList.add("crit");
-        term.style.opacity = "0.25";
-        alarmSub.textContent = ip + "  ·  " + place;
-        alarm.hidden = false;
-        // hold on the scary bit, then reveal the punchline
-        setTimeout(function () {
-          breach.classList.remove("crit");
-          alarm.hidden = true;
-          term.style.display = "none";
-          punch.hidden = false;
-        }, 4200);
+      function type() {
+        if (li >= lines.length) { term.innerHTML = built.replace(/\n$/, ""); return; }
+        var line = lines[li];
+        if (ci < line.txt.length) {
+          ci++;
+          render(line.txt.slice(0, ci));
+          setTimeout(type, 10 + Math.random() * 20);
+        } else {
+          built += line.html + "\n";
+          li++; ci = 0;
+          render("");
+          // small pause between lines; longer before the encrypt/error beats
+          var pause = 90 + Math.random() * 180;
+          if (li === 13 || li === 14) pause = 700;
+          setTimeout(type, pause);
+        }
       }
 
       type();
