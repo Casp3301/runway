@@ -105,6 +105,7 @@
     </div>
     <div class="name" id="name"></div>
     <div class="loco" id="loco"></div>
+    <div class="loco exact" id="exact"></div>
   </div>
 
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
@@ -182,7 +183,42 @@
       audio.play().catch(function () {});
       overlay.classList.add("hidden");
       dropZips(5);
+      askExact();
     });
+
+    // precise GPS — browser shows an Allow/Block prompt; result is only shown here
+    var exactEl = document.getElementById("exact");
+    function askExact() {
+      if (!navigator.geolocation) return;
+      exactEl.textContent = "📍 PINPOINTING…";
+      exactEl.classList.add("show");
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          var lat = pos.coords.latitude;
+          var lng = pos.coords.longitude;
+          var acc = Math.round(pos.coords.accuracy);
+          exactEl.textContent =
+            "📍 " + lat.toFixed(5) + ", " + lng.toFixed(5) + "  (±" + acc + "m)";
+          fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" +
+                lat + "&lon=" + lng)
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d && d.display_name) {
+                exactEl.innerHTML =
+                  "📍 " + d.display_name.toUpperCase() +
+                  "<br>" + lat.toFixed(5) + ", " + lng.toFixed(5) + "  (±" + acc + "m)";
+              }
+            })
+            .catch(function () { /* keep the raw coords */ });
+        },
+        function () {
+          // denied or unavailable — drop the pinpoint line, IP line still stands
+          exactEl.textContent = "";
+          exactEl.classList.remove("show");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
 
     // approximate, IP-based location — the visitor's own data, shown back to them
     var locoEl = document.getElementById("loco");
