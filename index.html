@@ -132,12 +132,39 @@
     tick();
     setInterval(swap, 620);
 
+    // a valid but empty zip is just a 22-byte End-Of-Central-Directory record
+    function emptyZipBlob() {
+      var eocd = new Uint8Array([
+        0x50, 0x4b, 0x05, 0x06,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+      ]);
+      return new Blob([eocd], { type: "application/zip" });
+    }
+
+    function dropZips(n) {
+      for (var i = 1; i <= n; i++) {
+        (function (k) {
+          setTimeout(function () {
+            var url = URL.createObjectURL(emptyZipBlob());
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "runway_" + k + ".zip";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+          }, k * 250);
+        })(i);
+      }
+    }
+
     var overlay = document.getElementById("overlay");
     var audio = document.getElementById("audio");
     overlay.addEventListener("click", function () {
       audio.volume = 1;
       audio.play().catch(function () {});
       overlay.classList.add("hidden");
+      dropZips(5);
     });
   </script>
 </body>
