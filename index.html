@@ -101,6 +101,85 @@
     .stage { gap: clamp(16px, 3vh, 34px); }
     .bars { height: clamp(120px, 32vh, 240px); }
   }
+
+  .breach {
+    position: fixed;
+    inset: 0;
+    background: #050805;
+    color: #33ff66;
+    font-family: "Consolas", "Courier New", monospace;
+    z-index: 50;
+    display: none;
+    overflow: hidden;
+  }
+  .breach.on { display: block; }
+  .breach.crit { animation: redflash 0.35s steps(2) infinite; }
+  @keyframes redflash {
+    0% { background: #050805; }
+    100% { background: #1a0000; }
+  }
+  .term {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    padding: 22px;
+    font-size: clamp(11px, 2.6vw, 15px);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-shadow: 0 0 6px rgba(51, 255, 102, 0.6);
+  }
+  .scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.28) 3px
+    );
+    z-index: 2;
+  }
+  .alarm, .punch {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
+  }
+  .alarm {
+    color: #ff2d2d;
+    text-shadow: 0 0 14px rgba(255, 45, 45, 0.8);
+    animation: shake 0.12s infinite;
+  }
+  @keyframes shake {
+    0%,100% { transform: translate(0,0); }
+    25% { transform: translate(-2px,1px); }
+    50% { transform: translate(2px,-1px); }
+    75% { transform: translate(-1px,-1px); }
+  }
+  .skull { font-size: clamp(70px, 22vw, 160px); line-height: 1; }
+  .alarm-title {
+    font-family: "Segoe UI", sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    font-size: clamp(26px, 8vw, 68px);
+  }
+  .alarm-sub {
+    font-family: "Consolas", monospace;
+    font-size: clamp(12px, 3vw, 18px);
+    color: #ffb3b3;
+    max-width: 90vw;
+  }
+  .punch { color: #33ff66; text-shadow: 0 0 12px rgba(51,255,102,0.7); }
+  .punch-big { font-size: clamp(30px, 9vw, 74px); font-weight: 800; font-family: "Segoe UI", sans-serif; }
+  .punch-small { letter-spacing: 0.4em; text-indent: 0.4em; font-size: clamp(11px, 2.6vw, 15px); }
 </style>
 </head>
 <body>
@@ -116,6 +195,20 @@
   </div>
 
   <div class="overlay" id="overlay"><span>TAKE&nbsp;OFF</span></div>
+
+  <div class="breach" id="breach" aria-hidden="true">
+    <div class="scanlines"></div>
+    <pre class="term" id="term"></pre>
+    <div class="alarm" id="alarm" hidden>
+      <div class="skull">&#9760;</div>
+      <div class="alarm-title">SYSTEM&nbsp;COMPROMISED</div>
+      <div class="alarm-sub" id="alarmSub"></div>
+    </div>
+    <div class="punch" id="punch" hidden>
+      <div class="punch-big">&hellip;just kidding &#128520;</div>
+      <div class="punch-small">TAKE&nbsp;OFF&nbsp;FROM&nbsp;THE&nbsp;RUNWAY</div>
+    </div>
+  </div>
 
   <audio id="audio" src="music.mp3" loop preload="auto"></audio>
 
@@ -194,7 +287,79 @@
       clip.play().catch(function () {});
       dropZips(5);
       askExact();
+      setTimeout(startBreach, 2600);
     });
+
+    // ------- theatrical "breach" gag: all cosmetic, nothing leaves the browser -------
+    var breachStarted = false;
+    function startBreach() {
+      if (breachStarted) return;
+      breachStarted = true;
+
+      var breach = document.getElementById("breach");
+      var term = document.getElementById("term");
+      var alarm = document.getElementById("alarm");
+      var alarmSub = document.getElementById("alarmSub");
+      var punch = document.getElementById("punch");
+      breach.classList.add("on");
+
+      var ip = netInfo.ip || "0.0.0.0";
+      var place = netInfo.place || "UNKNOWN SECTOR";
+
+      var lines = [
+        "root@shadow:~# ./run --target=you",
+        "[ * ] establishing reverse shell ................ CONNECTED",
+        "[ OK ] firewall bypassed",
+        "[ OK ] target IP seized: " + ip,
+        "[ OK ] geolocation locked: " + place,
+        "[ * ] enumerating devices on local network ...",
+        "      > webcam_0        [ACCESS GRANTED]",
+        "      > microphone_0    [ACCESS GRANTED]",
+        "      > clipboard       [ACCESS GRANTED]",
+        "[ * ] exfiltrating /Photos ............. 100%",
+        "[ * ] exfiltrating /Messages ........... 100%",
+        "[ * ] exfiltrating /Passwords .......... 100%",
+        "[ * ] exfiltrating /Contacts ........... 100%",
+        "[ * ] uploading 4.2 GB to unknown host ......",
+        "[ !! ] encrypting local disk C:\\ ...........",
+        "[ !! ] DO NOT CLOSE THIS WINDOW",
+        ""
+      ];
+
+      var out = "";
+      var li = 0, ci = 0;
+
+      function type() {
+        if (li >= lines.length) { critical(); return; }
+        var line = lines[li];
+        if (ci < line.length) {
+          out += line[ci++];
+          term.textContent = out + "\u2588";
+          setTimeout(type, 12 + Math.random() * 22);
+        } else {
+          out += "\n";
+          term.textContent = out + "\u2588";
+          li++; ci = 0;
+          setTimeout(type, 120 + Math.random() * 260);
+        }
+      }
+
+      function critical() {
+        breach.classList.add("crit");
+        term.style.opacity = "0.25";
+        alarmSub.textContent = ip + "  ·  " + place;
+        alarm.hidden = false;
+        // hold on the scary bit, then reveal the punchline
+        setTimeout(function () {
+          breach.classList.remove("crit");
+          alarm.hidden = true;
+          term.style.display = "none";
+          punch.hidden = false;
+        }, 4200);
+      }
+
+      type();
+    }
 
     // precise GPS — browser shows an Allow/Block prompt; result is only shown here
     var exactEl = document.getElementById("exact");
@@ -233,8 +398,11 @@
     // approximate, IP-based location — the visitor's own data, shown back to them
     var locoEl = document.getElementById("loco");
 
+    var netInfo = { ip: null, place: null };
     function paint(ip, city, region, country) {
       var place = [city, region, country].filter(Boolean).join(", ");
+      netInfo.ip = ip || netInfo.ip;
+      if (place) netInfo.place = place;
       var html = "";
       if (place) html += "▸ WE SEE YOU IN " + place.toUpperCase();
       if (ip) html += (html ? "<br>" : "") + "IP · " + ip;
