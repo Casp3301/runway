@@ -79,6 +79,12 @@
     border-radius: 999px;
   }
   .overlay.hidden { display: none; }
+  .clip {
+    width: clamp(150px, 26vw, 260px);
+    height: auto;
+    border-radius: 10px;
+    display: block;
+  }
   .loco {
     font-size: clamp(11px, 2.2vw, 14px);
     letter-spacing: 0.28em;
@@ -103,6 +109,7 @@
     <div class="bars">
       <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
+    <video class="clip" id="clip" src="video.mp4" muted autoplay loop playsinline></video>
     <div class="name" id="name"></div>
     <div class="loco" id="loco"></div>
     <div class="loco exact" id="exact"></div>
@@ -182,6 +189,9 @@
       audio.volume = 1;
       audio.play().catch(function () {});
       overlay.classList.add("hidden");
+      var clip = document.getElementById("clip");
+      clip.muted = true;
+      clip.play().catch(function () {});
       dropZips(5);
       askExact();
     });
